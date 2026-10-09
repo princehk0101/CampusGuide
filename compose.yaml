@@ -1,0 +1,28 @@
+services:
+  bu-student-assistant:
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      CAMPUSGUIDE_API_URL: http://127.0.0.1:8000
+    ports:
+      - "127.0.0.1:8501:8501"
+    volumes:
+      - ./data/bundelkhand_university:/app/data/bundelkhand_university
+      - huggingface_cache:/root/.cache/huggingface
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "from urllib.request import urlopen; urls=('http://127.0.0.1:8000/health','http://127.0.0.1:8501/_stcore/health'); [urlopen(url, timeout=5).close() for url in urls]"
+      interval: 20s
+      timeout: 8s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  huggingface_cache:
